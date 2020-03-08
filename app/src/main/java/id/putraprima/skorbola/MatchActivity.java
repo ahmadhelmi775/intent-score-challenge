@@ -14,6 +14,7 @@ import id.putraprima.skorbola.model.Data;
 public class MatchActivity extends AppCompatActivity {
     public static final String DATA_KEY = "data";
     public static final String WINNER = "winner";
+    private static final int SCORER_ACTIVITY_REQUEST_CODE = 0;
     private TextView homeText;
     private TextView awayText;
     private TextView hscore;
@@ -30,14 +31,14 @@ public class MatchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_match);
         homeText = findViewById(R.id.txt_home);
         awayText = findViewById(R.id.txt_away);
-        hscore = findViewById(R.id.score_home);
-        ascore = findViewById(R.id.score_away);
+        hscore = (TextView) findViewById(R.id.score_home);
+        ascore = (TextView) findViewById(R.id.score_away);
         homeLogo = findViewById(R.id.home_logo);
         awayLogo = findViewById(R.id.away_logo);
 
         Bundle extras = getIntent().getExtras();
 
-        if (extras != null){
+        if (extras != null) {
             data = getIntent().getParcelableExtra(DATA_KEY);
             awayText.setText(data.getAwayName());
             homeText.setText(data.getHomeName());
@@ -60,11 +61,11 @@ public class MatchActivity extends AppCompatActivity {
 
         String winner;
 
-        if (homeScore > awayScore){
+        if (homeScore > awayScore) {
             winner = data.getHomeName() + " Is Winner";
-        } else if (homeScore < awayScore){
+        } else if (homeScore < awayScore) {
             winner = data.getAwayName() + " Is Winner";
-        } else{
+        } else {
             winner = "DRAW";
         }
 
@@ -76,11 +77,35 @@ public class MatchActivity extends AppCompatActivity {
 
     public void handleAway(View view) {
         Intent intent = new Intent(this, ScorerActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, SCORER_ACTIVITY_REQUEST_CODE);
+        homeScore++;
+        hscore.setText(Integer.toString(awayScore));
     }
 
     public void handleHome(View view) {
         Intent intent = new Intent(this, ScorerActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, SCORER_ACTIVITY_REQUEST_CODE);
+        awayScore++;
+        ascore.setText(Integer.toString(homeScore));
+    }
+
+    // This method is called when the second activity finishes
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Check that it is the SecondActivity with an OK result
+        if (requestCode == SCORER_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+
+                // Get String data from Intent
+                String returnString = data.getStringExtra("keyName");
+
+
+                // Set text view with string
+                TextView textView = (TextView) findViewById(R.id.textView);
+                textView.setText(returnString);
+            }
+        }
     }
 }
